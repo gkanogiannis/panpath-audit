@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use panpath-audit, please cite it using this metadata."
+type: software
+title: panpath-audit
+abstract: >-
+  A zero-dependency command-line tool that verifies whether the genome and
+  haplotype paths embedded in a pangenome graph (GFA) reconstruct exactly the
+  source FASTA sequences they represent, with localized diagnostics and
+  CI-grade exit codes.
+version: 0.1.0
+license: Apache-2.0
+repository-code: "https://github.com/agkanogiannis/panpath-audit"
+url: "https://github.com/agkanogiannis/panpath-audit"
+authors:
+  - family-names: Gkanogiannis
+    given-names: Anestis
+    email: ganoyan@gmail.com
+keywords:
+  - pangenome
+  - gfa
+  - bioinformatics
+  - genomics
+  - graph

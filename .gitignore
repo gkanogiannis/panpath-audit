@@ -1,0 +1,9 @@
+.DS_Store
+/venv/
+/target/
+/data/
+.panpath*
+*.tmp
+docs/test-data-notes.md
+initial-prompt.md
+/handout.md
