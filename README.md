@@ -54,11 +54,10 @@ this explicitly.
 From source (requires Rust ≥ 1.89 / edition 2024):
 
 ```bash
+cargo install panpath-audit      # install from crates.io
 cargo build --release          # -> target/release/panpath-audit
 cargo install --path .         # -> installs `panpath-audit`
 ```
-
-> A `cargo install panpath-audit` line will be added after the first crates.io release.
 
 ## Usage
 

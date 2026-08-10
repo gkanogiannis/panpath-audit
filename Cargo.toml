@@ -11,7 +11,13 @@ homepage = "https://github.com/agkanogiannis/panpath-audit"
 readme = "README.md"
 keywords = ["pangenome", "gfa", "bioinformatics", "genomics", "graph"]
 categories = ["command-line-utilities", "science"]
-exclude = ["/data", "/venv", "/docs/test-data-notes.md", "/initial-prompt.md"]
+exclude = [
+    "/data",
+    "/venv",
+    "/docs/test-data-notes.md",
+    "/initial-prompt.md",
+    "/handout.md",
+]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
