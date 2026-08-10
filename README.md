@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/agkanogiannis/panpath-audit/actions/workflows/ci.yml"><img src="https://github.com/agkanogiannis/panpath-audit/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/gkanogiannis/panpath-audit/actions/workflows/ci.yml"><img src="https://github.com/gkanogiannis/panpath-audit/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/rust-1.89%2B-orange.svg" alt="Rust 1.89+">
 </p>
