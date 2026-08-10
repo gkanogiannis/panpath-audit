@@ -9,8 +9,8 @@ abstract: >-
   CI-grade exit codes.
 version: 0.1.0
 license: Apache-2.0
-repository-code: "https://github.com/agkanogiannis/panpath-audit"
-url: "https://github.com/agkanogiannis/panpath-audit"
+repository-code: "https://github.com/gkanogiannis/panpath-audit"
+url: "https://github.com/gkanogiannis/panpath-audit"
 authors:
   - family-names: Gkanogiannis
     given-names: Anestis
