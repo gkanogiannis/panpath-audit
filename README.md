@@ -99,6 +99,139 @@ FASTA inputs form one source set, and every resulting identifier must be unique.
 See the [usage guide](https://github.com/gkanogiannis/panpath-audit/blob/main/docs/usage.md)
 for mapping examples and the complete option reference.
 
+## Test data
+
+The large integration-test data used while developing `panpath-audit` are not
+stored in this repository. They are public, but the complete human set is about
+100 GB compressed and the tomato preparation needs additional working space.
+Everything below is written relative to the repository root and leaves the data
+under the git-ignored `data/` directory.
+
+The commands require `curl`, `awk`, `gzip`, and `sha256sum`. Tomato preparation
+also requires [samtools](https://www.htslib.org/), `bgzip`, and
+[GNU parallel](https://www.gnu.org/software/parallel/). Use `wget` instead of
+`curl` if preferred.
+
+### Human (HPRC)
+
+The human test uses the HPRC Year 1 haplotype assemblies and the GRCh38-based
+Minigraph-Cactus graphs. The official assembly index contains both anonymous S3
+URLs and SHA-256 checksums:
+
+```bash
+mkdir -p data/human-HPRC/{assemblies,pangenome}
+
+index=data/human-HPRC/assemblies/Year1_assemblies_v2_genbank.index
+curl -fL --retry 5 \
+  -o "$index" \
+  https://raw.githubusercontent.com/human-pangenomics/HPP_Year1_Assemblies/main/assembly_index/Year1_assemblies_v2_genbank.index
+
+# Columns 2 and 3 are the paternal and maternal S3 URLs; columns 6 and 7
+# contain their SHA-256 digests. Blank maternal entries are skipped.
+tail -n +2 "$index" |
+  awk -F '\t' '{if ($2 != "") print $2 "\t" $6; if ($3 != "") print $3 "\t" $7}' |
+  while IFS=$'\t' read -r s3_url digest; do
+    https_url=${s3_url/s3:\/\/human-pangenomics/https:\/\/s3-us-west-2.amazonaws.com\/human-pangenomics}
+    output=data/human-HPRC/assemblies/${https_url##*/}
+    curl -fL -C - --retry 5 --speed-limit 1024 --speed-time 60 \
+      -o "$output" "$https_url"
+    printf '%s  %s\n' "$digest" "$output" | sha256sum -c -
+  done
+```
+
+Download the two graphs used for the clipped and full-graph checks:
+
+```bash
+base=https://s3-us-west-2.amazonaws.com/human-pangenomics/pangenomes/freeze/freeze1/minigraph-cactus
+
+curl -fL -C - --retry 5 --speed-limit 1024 --speed-time 60 \
+  -o data/human-HPRC/pangenome/hprc-v1.0-mc-grch38.gfa.gz \
+  "$base/hprc-v1.0-mc-grch38/hprc-v1.0-mc-grch38.gfa.gz"
+curl -fL -C - --retry 5 --speed-limit 1024 --speed-time 60 \
+  -o data/human-HPRC/pangenome/hprc-v1.1-mc-grch38.full.gfa.gz \
+  "$base/hprc-v1.1-mc-grch38/hprc-v1.1-mc-grch38.full.gfa.gz"
+
+gzip -t data/human-HPRC/pangenome/*.gfa.gz
+```
+
+For a smaller endurance check, one assembly and the v1.0 graph are enough:
+
+```bash
+panpath-audit \
+  --fasta-pansn HG00438 1 \
+  data/human-HPRC/assemblies/HG00438.paternal.f1_assembly_v2_genbank.fa.gz \
+  data/human-HPRC/pangenome/hprc-v1.0-mc-grch38.gfa.gz
+```
+
+The clipped graph intentionally contains gaps in some `W` walks, so the report
+can include `not_embedded` bases. See the
+[HPRC data-use policy](https://humanpangenome.org/data-use/) before redistributing
+derived human data.
+
+### Tomato (TGG)
+
+The tomato test follows the public 23-assembly preparation from the
+[PGGB paper workflow](https://github.com/pangenome/pggb-paper/blob/main/workflows/0.Preparation.md).
+The assemblies and their MD5 files are hosted by the
+[Sol Genomics Network](https://solgenomics.net/ftp/genomes/TGG/genome/):
+
+```bash
+mkdir -p data/tomato-tgg/{assemblies,sources-chr2,pangenome}
+curl -fL --retry 5 \
+  -o data/tomato-tgg/tomato23.urls.tsv \
+  https://raw.githubusercontent.com/pangenome/pggb-paper/main/data/tomato23.urls.tsv
+
+cut -f 2 data/tomato-tgg/tomato23.urls.tsv |
+  parallel -j 4 --halt soon,fail=1 \
+    'curl -fL -C - --retry 5 -O --output-dir data/tomato-tgg/assemblies {}'
+
+# Fetch and check the publisher-provided MD5 file for every assembly.
+cut -f 2 data/tomato-tgg/tomato23.urls.tsv |
+  parallel -j 4 --halt soon,fail=1 \
+    'curl -fL --retry 5 -O --output-dir data/tomato-tgg/assemblies {}.md5.txt'
+(cd data/tomato-tgg/assemblies && for check in *.md5.txt; do md5sum -c "$check"; done)
+```
+
+The audit-ready chromosome-2 FASTA and GFA are derived files, not publisher
+downloads. Prepare PanSN names and extract chromosome 2 as described upstream:
+
+```bash
+cd data/tomato-tgg/assemblies
+for input in *.fasta.gz; do
+  sample=${input%%.*}
+  gzip -dc "$input" |
+    sed "s/^>/>${sample}#1#/" |
+    bgzip -@ 4 > "${sample}.pansn.fa.gz"
+  samtools faidx "${sample}.pansn.fa.gz"
+done
+
+: > ../sources-chr2/tomato23_chr2.sources.fa
+for input in *.pansn.fa.gz; do
+  sequence=$(cut -f 1 "${input}.fai" | grep -E '#(chr|ch)0?2$' | head -n 1)
+  test -n "$sequence"
+  samtools faidx "$input" "$sequence" >> ../sources-chr2/tomato23_chr2.sources.fa
+done
+bgzip -@ 4 ../sources-chr2/tomato23_chr2.sources.fa
+samtools faidx ../sources-chr2/tomato23_chr2.sources.fa.gz
+cd ../../..
+```
+
+Build the chromosome graph with PGGB using the parameters from its published
+tomato workflow, then copy the final GFA to
+`data/tomato-tgg/pangenome/tomato23_chr2.cleaned.gfa.gz`. The graph must contain
+all 23 `P` paths with the same PanSN identifiers as the prepared FASTA, inline
+segment sequences, and only `*` or `0M` path overlaps. Validate those conditions
+before using a graph produced by a different PGGB release.
+
+Run the prepared test with:
+
+```bash
+panpath-audit \
+  --fasta data/tomato-tgg/sources-chr2/tomato23_chr2.sources.fa.gz \
+  data/tomato-tgg/pangenome/tomato23_chr2.cleaned.gfa.gz
+# Expected: IDENTICAL 23 and exit status 0.
+```
+
 ## Example
 
 ```text

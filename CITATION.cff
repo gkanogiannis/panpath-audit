@@ -7,7 +7,7 @@ abstract: >-
   haplotype paths embedded in a pangenome graph (GFA) reconstruct exactly the
   source FASTA sequences they represent, with localized diagnostics and
   CI-grade exit codes.
-version: 0.1.1
+version: 0.1.2
 license: Apache-2.0
 repository-code: "https://github.com/gkanogiannis/panpath-audit"
 url: "https://github.com/gkanogiannis/panpath-audit"
