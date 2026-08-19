@@ -416,7 +416,7 @@ fn json_mode_emits_one_versioned_document() {
 
     assert_eq!(output.status.code(), Some(0));
     assert_eq!(document["schema"], "panpath-audit-report");
-    assert_eq!(document["schema_version"], "0.1.0");
+    assert_eq!(document["schema_version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(document["state"], "completed");
     assert_eq!(document["summary"]["identical"], 1);
     assert_eq!(document["outcomes"][0]["identifier"], "json-path");
@@ -434,7 +434,7 @@ fn json_mode_remains_valid_when_preflight_fails() {
 
     assert_eq!(output.status.code(), Some(3));
     assert_eq!(document["schema"], "panpath-audit-report");
-    assert_eq!(document["schema_version"], "0.1.0");
+    assert_eq!(document["schema_version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(document["state"], "invalid");
     assert_eq!(document["outcomes"], serde_json::json!([]));
     assert_eq!(document["errors"][0]["code"], "INVALID_NUCLEOTIDE");
@@ -778,7 +778,7 @@ fn comprehensive_statistics_partition_source_and_graph_bases() {
     let document: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
 
     assert_eq!(output.status.code(), Some(2));
-    assert_eq!(document["schema_version"], "0.1.0");
+    assert_eq!(document["schema_version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(document["statistics"]["source"]["total_bases"], 10);
     assert_eq!(document["statistics"]["source"]["bases"]["matched"], 7);
     assert_eq!(document["statistics"]["source"]["bases"]["substituted"], 1);
@@ -860,7 +860,7 @@ fn comprehensive_invalid_json_has_null_statistics() {
     let document: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
 
     assert_eq!(output.status.code(), Some(3));
-    assert_eq!(document["schema_version"], "0.1.0");
+    assert_eq!(document["schema_version"], env!("CARGO_PKG_VERSION"));
     assert_eq!(document["statistics"], serde_json::Value::Null);
 }
 
