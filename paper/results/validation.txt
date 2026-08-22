@@ -1,26 +1,44 @@
 Validation record
 =================
 
-Date: 2026-08-22
-Git commit: 22b1783adcd27a6a6df4e1fcd161d4de9ca210d5
 Software version: panpath-audit 0.1.2
 
-cargo test
-  PASS: 8 unit tests and 60 CLI tests
+The audits and the manuscript build are recorded separately because they happen
+at different points and previously drifted out of sync.
 
-cargo fmt --all -- --check
-  PASS
+Audits
+------
+Executed 2026-08-22 at commit 22b1783adcd27a6a6df4e1fcd161d4de9ca210d5.
+Environment as recorded in results/environment.tsv.
 
-cargo clippy --all-targets -- -D warnings
-  PASS
+  cargo test                              PASS: 8 unit tests and 60 CLI tests
+  cargo fmt --all -- --check              PASS
+  cargo clippy --all-targets -- -D warnings   PASS
+  cargo build --release                   PASS
+  paper/scripts/verify_inputs.sh          PASS: 9 input artifacts checksummed,
+                                          all gzip members intact, manifests at
+                                          expected sizes
 
-cargo build --release
-  PASS
+Cross-environment reproduction
+------------------------------
+The same pipeline was executed on unrelated hardware differing in processor
+count, operating system, kernel, filesystem, and Rust minor version. Against
+byte-identical inputs (9 of 9 SHA-256 matching):
 
-paper/scripts/verify_inputs.sh
-  PASS: 9 input artifacts checksummed, all gzip members intact,
-  manifests at expected sizes. Recorded in results/input_checksums.tsv
-  and results/environment.tsv.
+  outcome classifications, source and traversal counts,
+  not-embedded bases, exit codes                        identical for all 5 cases
+  per-sequence SHA-256 and BLAKE3 digests               identical, every identifier
+  source and graph base ledgers                         identical, every identifier
+  identifiers compared                                  23 per tomato case,
+                                                        40,970 and 40,971 for HPRC
 
-make -C paper
-  PASS: 5-page PDF, no undefined references and no undefined citations.
+Only elapsed time, maximum resident set size, and tracked peak differed. The
+prior run's records are kept verbatim in results/reproduction/.
+
+Manuscript build
+----------------
+Verified 2026-08-22 at commit 90da5789a6dbe060c3d516d1a59b8aa487096887 plus the
+reproduction edits staged for the submission commit.
+
+  make -C paper   PASS
+

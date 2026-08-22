@@ -173,7 +173,11 @@ processors and \EnvHostMemory{}~GiB host memory; inputs were read from
 \texttt{\EnvDataFilesystem{}} storage and scratch files were written to
 \texttt{\EnvScratchFilesystem{}} storage. Wall-clock time and maximum resident
 set size in \cref{tab:results} are therefore descriptive telemetry, not a
-cross-system performance benchmark.
+cross-system performance benchmark. The complete evaluation was subsequently
+rerun on unrelated hardware with a different processor count, operating system,
+kernel, filesystem, and Rust minor version against byte-identical inputs: every
+outcome classification, base ledger, and digest was unchanged, and only the
+timing and memory telemetry differed.
 
 \input{results/derived/results_table.tex}
 

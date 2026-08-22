@@ -57,6 +57,18 @@ the first divergent position, the source symbol, the symbol the graph carries
 there, the graph segment and its length, and the IUPAC ambiguity-code census of
 that chromosome.
 
+`results/reproduction/` holds the corresponding artifacts from an earlier,
+independent execution of the same pipeline on different hardware, copied
+verbatim rather than regenerated. It is what the manuscript's reproduction
+sentence rests on: the two executions differed in processor count, operating
+system, kernel, filesystem, and Rust minor version, and comparing the files
+there against `results/input_checksums.tsv` and `results/derived/summary.tsv`
+shows byte-identical inputs and identical outcome classifications, counts, and
+exit codes. Per-sequence digests and full base ledgers were compared against the
+raw JSON reports as well and were unchanged for every identifier;
+`results/reproduction/README.txt` records that. The raw reports themselves are
+not versioned because of their size.
+
 The two HPRC graphs name their GRCh38 traversals differently, so
 `human_source_arguments` takes the mapping as an argument: `prefix` for the v1.0
 clipped graph (`P` paths named `GRCh38.chr1`) and `pansn` for the v1.1 full graph
