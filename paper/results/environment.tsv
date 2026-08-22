@@ -1,6 +1,6 @@
 key	value
-timestamp_utc	2026-08-22T01:07:18Z
-git_commit	ad06a3a20987c2ef5c6eef84bd19b4a44cf86ce9
+timestamp_utc	2026-08-22T10:55:12Z
+git_commit	22b1783adcd27a6a6df4e1fcd161d4de9ca210d5
 panpath_audit	panpath-audit 0.1.2
 rustc	rustc 1.98.0 (88d9e12ae 2026-08-18)
 cargo	cargo 1.98.0 (797e8a9bc 2026-08-05)

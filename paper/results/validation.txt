@@ -1,9 +1,8 @@
 Validation record
 =================
 
-Date: 2026-08-21
-Git commit: ad06a3a20987c2ef5c6eef84bd19b4a44cf86ce9
-  (working tree also carries the uncommitted paper/ package; see note below)
+Date: 2026-08-22
+Git commit: 22b1783adcd27a6a6df4e1fcd161d4de9ca210d5
 Software version: panpath-audit 0.1.2
 
 cargo test
@@ -25,10 +24,3 @@ paper/scripts/verify_inputs.sh
 
 make -C paper
   PASS: 5-page PDF, no undefined references and no undefined citations.
-
-Note on provenance
-------------------
-results/environment.tsv stamps git commit ad06a3a, which does not yet contain
-the paper/ package. Once paper/ is committed, rerun verify_inputs.sh so the
-environment record names the commit that actually holds the scripts used to
-produce these results.
