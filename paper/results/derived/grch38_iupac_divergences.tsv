@@ -1,0 +1,15 @@
+chromosome	first_divergence_source_position_1based	source_symbol	graph_symbol	graph_segment	graph_segment_length_bp	substituted_bases_in_chromosome	iupac_ambiguity_codes_in_chromosome	iupac_breakdown
+chr1	248752514	M	N	2550772	1	2	2	M=1,R=1
+chr2	20953875	Y	N	8329956	1	9	9	K=1,M=1,R=1,W=2,Y=4
+chr3	16814155	R	N	15198563	1	7	7	B=1,R=1,W=2,Y=3
+chr6	61366327	Y	N	29921570	1	1	1	Y=1
+chr7	154575459	R	N	36273753	1	4	4	R=1,S=1,Y=2
+chr9	89883952	R	N	41315951	1	3	3	R=1,Y=2
+chrX	222582	Y	N	77423819	223784	5	5	R=1,S=1,W=1,Y=2
+chr10	39239443	R	N	48512711	1	36	36	B=1,K=4,M=3,R=13,S=1,W=6,Y=8
+chr12	122093260	Y	N	55082249	1	3	3	M=1,Y=2
+chr13	100972571	Y	N	55973894	1	3	3	K=1,Y=2
+chr16	88366825	R	N	65734409	1	1	1	R=1
+chr17	489374	R	N	67051804	1	12	12	K=2,R=3,S=1,W=1,Y=5
+chr21	41829696	M	N	75066872	1	3	3	M=2,R=1
+chr22	16309656	R	N	76249687	1	5	5	R=2,W=1,Y=2

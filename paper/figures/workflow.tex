@@ -1,0 +1,56 @@
+\begin{tikzpicture}[
+    every node/.style={font=\small},
+    >=Latex,
+    stage/.style={draw=black!55, line width=0.9pt, rounded corners=3pt, align=center,
+                  text width=2.75cm, minimum height=1.3cm, inner sep=2mm},
+    outcome/.style={draw=black!55, line width=0.9pt, rounded corners=3pt, align=left,
+                     text width=2.75cm, minimum height=1.55cm, inner sep=2.4mm},
+    badge/.style={circle, text=white, font=\bfseries\scriptsize, inner sep=0pt, minimum size=4.3mm},
+    pipearrow/.style={-{Latex[length=2.2mm,width=1.6mm]}, line width=0.9pt, black!60},
+    branch/.style={-{Latex[length=2.2mm,width=1.6mm]}, line width=0.9pt}
+]
+
+% ---- Stage 1: pipeline (top row) ----
+\node[stage, draw=blue!55!black, top color=blue!16, bottom color=blue!2]
+    (fasta) at (1.7,0) {Source FASTA\\[1pt]{\footnotesize\itshape named sequences}};
+\node[stage, draw=blue!55!black, top color=blue!16, bottom color=blue!2]
+    (gfa) at (5.7,0) {GFA1/1.1 graph\\[1pt]{\footnotesize\itshape segments + \texttt{P}/\texttt{W}}};
+\node[stage, draw=violet!55!black, top color=violet!16, bottom color=violet!2]
+    (pre) at (9.7,0) {Preflight\\[1pt]{\footnotesize\itshape names, ranges, steps}};
+\node[stage, draw=violet!55!black, top color=violet!16, bottom color=violet!2]
+    (cmp) at (13.7,0) {Compare\\[1pt]{\footnotesize\itshape stream \& digest symbols}};
+
+\foreach \stepnum/\stepnode/\stepcol in {1/fasta/blue,2/gfa/blue,3/pre/violet,4/cmp/violet}
+    \node[badge, fill=\stepcol!60!black] at (\stepnode.north west) {\stepnum};
+
+\draw[pipearrow] (fasta) -- (gfa);
+\draw[pipearrow] (gfa) -- (pre);
+\draw[pipearrow] (pre) -- (cmp);
+
+% ---- Distributor: single source of truth fans out to four outcomes ----
+\draw[line width=0.9pt, black!55] (cmp.south) -- (13.7,-1.6) -- (1.7,-1.6);
+
+% ---- Stage 2: the four classification outcomes (bottom row) ----
+\node[outcome, draw=green!45!black, top color=green!13, bottom color=white]
+    (identical) at (1.7,-3.55)
+    {{\large\color{green!40!black}\textbullet}~\textbf{Identical}\\[2pt]
+     {\footnotesize digests and base ledgers match}};
+\node[outcome, draw=red!55!black, top color=red!11, bottom color=white]
+    (divergent) at (5.7,-3.55)
+    {{\large\color{red!55!black}\textbullet}~\textbf{Divergent}\\[2pt]
+     {\footnotesize first mismatching symbol located}};
+\node[outcome, draw=orange!70!black!85, top color=orange!16, bottom color=white]
+    (misspath) at (9.7,-3.55)
+    {{\large\color{orange!60!black}\textbullet}~\textbf{Missing path}\\[2pt]
+     {\footnotesize source has no embedded path}};
+\node[outcome, draw=teal!65!black, top color=teal!13, bottom color=white]
+    (misssrc) at (13.7,-3.55)
+    {{\large\color{teal!55!black}\textbullet}~\textbf{Missing source}\\[2pt]
+     {\footnotesize path has no paired source}};
+
+\draw[branch, green!40!black]  (1.7,-1.6)  -- (identical.north);
+\draw[branch, red!55!black]    (5.7,-1.6)  -- (divergent.north);
+\draw[branch, orange!60!black] (9.7,-1.6)  -- (misspath.north);
+\draw[branch, teal!55!black]   (13.7,-1.6) -- (misssrc.north);
+
+\end{tikzpicture}

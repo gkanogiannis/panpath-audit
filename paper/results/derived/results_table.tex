@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\caption{Sequence audits on the two public pangenome datasets and prepared tomato controls. Runtime and resident memory describe this single \EnvPlatform{} environment and are not comparative benchmarks.}
+\label{tab:results}
+\small
+\begin{tabularx}{\textwidth}{@{}l l c r r X r r@{}}
+\toprule
+Case & Graph & GFA & Sources & Traversals & Outcome & Time & RSS \\
+\midrule
+Tomato baseline & PGGB chr. 2 & P & 23 & 23 & 23 identical & 0.4 min & 1766 MiB \\
+Tomato altered MM & PGGB chr. 2 & P & 23 & 23 & 22 identical; 1 divergent & 0.4 min & 1762 MiB \\
+Tomato omitted SL5 & PGGB chr. 2 & P & 22 & 23 & 22 identical; 1 missing source & 0.4 min & 1759 MiB \\
+HPRC clipped & Minigraph--Cactus v1.0 & P+W & 40,928 & 22,979 & 22,923 identical; 14 divergent; 17,991 missing path; 42 missing source & 0.62 h & 5021 MiB \\
+HPRC full & Minigraph--Cactus v1.1 & W & 40,928 & 19,855 & 19,798 identical; 14 divergent; 21,116 missing path; 43 missing source & 0.63 h & 5517 MiB \\
+\bottomrule
+\end{tabularx}
+\end{table*}

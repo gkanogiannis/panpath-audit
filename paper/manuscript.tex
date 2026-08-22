@@ -1,0 +1,287 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=19mm]{geometry}
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+\usepackage[backend=biber,style=numeric-comp,sorting=none,maxbibnames=20]{biblatex}
+\addbibresource{references.bib}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\newcommand{\software}[1]{\texttt{#1}}
+\input{results/derived/macros.tex}
+
+\title{\textbf{panpath-audit: sequence-level verification of embedded pangenome paths against source assemblies}}
+\author{Anestis Gkanogiannis\\
+\small Independent Researcher, \textit{[Athens, Greece]}\\
+\small Correspondence: \href{mailto:anestis@gkanogiannis.com}{anestis@gkanogiannis.com}; ORCID: \textit{0000-0002-6441-0688}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Pangenome graphs embed assemblies as traversals through sequence-labelled
+segments, but internal graph validity does not establish that these traversals
+still reproduce the external assemblies from which a graph was constructed.
+We present \software{panpath-audit}, a command-line program that reconstructs
+GFA1 paths and coordinate-aware GFA1.1 walks and compares them symbol-for-symbol
+with named FASTA sources. The program performs an all-or-nothing input preflight,
+handles complete IUPAC reverse complements, distinguishes unembedded walk ranges
+from divergence, bounds tracked sequence memory, and emits deterministic human,
+JSON, or TSV reports. We evaluated the program using public tomato and Human
+Pangenome Reference Consortium graphs. In the tomato chromosome-2 graph,
+\TomatoIdentical{} traversals representing \TomatoSourceBases{} source bases
+were recovered exactly. Prepared controls localized an altered
+\TomatoDivergentIdentifier{} source at both linear and graph coordinates and
+identified an omitted \TomatoMissingIdentifier{} source explicitly. Audits of
+clipped and full Minigraph--Cactus graphs at human whole-pangenome scale
+independently reported the same \HprcClippedSubstituted{} substituted bases,
+which we trace to IUPAC ambiguity codes in GRCh38 that graph construction had
+replaced with \texttt{N}. These results support sequence auditing as
+a distinct complement to topological graph validation and as a practical gate
+for construction, conversion, distribution, and continuous-integration
+workflows.
+\end{abstract}
+
+\textbf{Keywords:} pangenome graph; GFA; sequence validation; FASTA; quality control
+
+\section{Introduction}
+
+Pangenome graphs represent the sequence diversity of a collection while
+retaining individual genomes or haplotypes as paths through the graph
+\cite{eizenga2020pangenome}. This model underlies resources such as the draft
+human pangenome \cite{liao2023draft} and graph-building systems including
+Minigraph--Cactus \cite{hickey2023minigraph} and PGGB
+\cite{garrison2024pggb}. Graphical Fragment Assembly (GFA) files commonly encode
+segment sequences in \texttt{S} records and embedded traversals in \texttt{P}
+paths or \texttt{W} walks \cite{gfaspec}.
+
+Graph topology and source preservation are related but different properties.
+A topology validator can establish that path steps are present and connected;
+for example, \software{odgi validate} checks path consistency with graph
+topology \cite{guarracino2022odgi}. It cannot establish that an independently
+distributed FASTA collection is the collection represented by the graph, nor
+that a segment sequence remained unchanged during conversion or transfer. A
+structurally valid graph may therefore reconstruct a different nucleotide
+sequence while continuing to satisfy its internal constraints.
+
+\software{panpath-audit} addresses the narrow question: did the embedded graph
+traversals preserve their named source sequences? It is builder-independent,
+operates directly on plain or gzip-compressed FASTA and GFA files, and reports
+both complete correspondence and sequence identity. Here we describe its audit
+contract and apply it to plant and human public pangenomes.
+
+\section{Implementation}
+
+\subsection{Audit contract}
+
+Source identifiers are paired case-sensitively with graph traversal names.
+Inputs may use exact names, arbitrary prefixes, or the PanSN convention
+\texttt{sample\#haplotype\#contig} \cite{pansnspec}. Nucleotide comparison is
+case-insensitive but symbol-exact over the DNA IUPAC alphabet; for example,
+\texttt{N} does not match \texttt{A}. Reverse-oriented segments use the complete
+IUPAC complement mapping.
+
+The supported graph contract comprises inline-sequence \texttt{S} records,
+blunt \texttt{P} paths with unspecified or \texttt{0M} overlaps, and
+coordinate-bearing \texttt{W} walks. Non-overlapping walk records with the same
+PanSN name are combined in coordinate order. Source intervals between explicit
+walk ranges are classified as not embedded rather than divergent. The program
+does not validate links, graph topology, external segment references, or
+non-blunt overlap CIGARs.
+
+Before comparison, an all-or-nothing preflight rejects invalid FASTA symbols,
+duplicate source names, missing segment sequences, unresolved steps, duplicate
+traversals, ambiguous walk ranges, and unsupported overlaps. A completed audit
+classifies every identifier as identical, divergent, missing path, or missing
+source (\cref{fig:workflow}). Divergence reports the first one-based source and
+traversal positions and, when present, the segment, orientation, traversal
+position, and within-segment position. Stable exit codes distinguish identity,
+divergence, correspondence failure, unsupported GFA, and operational failure.
+
+\begin{figure*}[t]
+\centering
+\resizebox{\linewidth}{!}{\input{figures/workflow.tex}}
+\caption{Audit workflow. FASTA identifiers are mapped to embedded GFA
+traversals by PanSN or prefix convention, inputs are preflighted, and oriented
+segment sequences are streamed and compared. Every identifier resolves to
+exactly one of four outcomes; coordinate gaps in GFA walks are tallied
+separately, within the identical and divergent ledgers, rather than as a fifth
+outcome.}
+\label{fig:workflow}
+\end{figure*}
+
+\subsection{Streaming and reporting}
+
+FASTA inputs are streamed twice: once to index mapped identifiers and lengths,
+and once to supply source sequences to a bounded worker pool. Graph records and
+segment sequences are indexed in anonymous temporary files instead of retaining
+the complete graph in memory. A shared admission budget bounds concurrently held
+sequence bytes; a contig larger than the budget is admitted alone to guarantee
+progress. This accounting intentionally excludes allocator overhead,
+compression buffers, parser metadata, operating-system caches, and temporary
+storage.
+
+JSON and TSV reports include SHA-256 and BLAKE3 digests of complete sources,
+addressed source ranges, and reconstructed traversals. Comprehensive mode adds
+separate source and graph base ledgers and bounded exact unit-cost Levenshtein
+alignment for divergent traversals. First-divergence diagnostics and digests
+remain available when the alignment work or memory limit is exceeded.
+
+\section{Evaluation}
+
+\subsection{Datasets and controls}
+
+The tomato dataset followed the 23-assembly preparation used to evaluate PGGB
+\cite{garrison2024pggb}, originally derived from the tomato graph pangenome
+resource of Zhou et al. \cite{zhou2022tomato}. Chromosome 2 sequences were
+renamed with PanSN identifiers and audited against the cleaned PGGB GFA containing
+23 \texttt{P} paths. Two prepared FASTA controls retained the same graph: one
+substituted a single base at the midpoint of the
+\TomatoDivergentSourceLength{}~bp MM chromosome, and one omitted the SL5 source
+entirely.
+
+For the human evaluation, 94 phased Year-1 HPRC assemblies with existing PanSN
+headers were combined with CHM13 using a PanSN mapping, then audited against the
+public GRCh38-based Minigraph--Cactus v1.0 clipped and v1.1 full graphs
+\cite{liao2023draft,hickey2023minigraph}. The two graphs name their GRCh38
+traversals differently: the clipped graph embeds GRCh38 as \texttt{P} paths named
+\texttt{GRCh38.chr1}, whereas the full graph embeds it as PanSN walks named
+\texttt{GRCh38\#0\#chr1}. GRCh38 was therefore mapped by graph path prefix for the
+clipped graph and by PanSN sample and haplotype for the full graph. Applying one
+convention to both graphs reclassifies every GRCh38 contig as missing instead of
+comparing it, which is itself an instance of the correspondence failure the audit
+is designed to expose. The clipped graph uses explicit walk ranges and can omit
+source intervals; the full graph preserves untrimmed walks.
+Publisher-provided assembly checksums were verified before analysis.
+
+\subsection{Execution and results}
+
+Version \EnvToolVersion{} of \software{panpath-audit} \cite{panpathsoftware} was
+compiled in release mode with Rust \EnvRustVersion{} and run with \EnvThreads{}
+worker threads, a \EnvMemoryMiB{}-MiB tracked-memory limit, and comprehensive
+statistics. Experiments ran on \EnvPlatform{} with \EnvLogicalCpus{} logical
+processors and \EnvHostMemory{}~GiB host memory; inputs were read from
+\texttt{\EnvDataFilesystem{}} storage and scratch files were written to
+\texttt{\EnvScratchFilesystem{}} storage. Wall-clock time and maximum resident
+set size in \cref{tab:results} are therefore descriptive telemetry, not a
+cross-system performance benchmark.
+
+\input{results/derived/results_table.tex}
+
+All \TomatoIdentical{} tomato paths were identical across
+\TomatoGraphBases{} reconstructed bases. Against the altered source,
+\software{panpath-audit} classified \TomatoDivergentIdentifier{} as divergent and
+the remaining 22 as identical, localizing the substituted base to source position
+\TomatoDivergenceSourcePosition{}, path position
+\TomatoDivergencePathPosition{}, and offset
+\TomatoDivergenceSegmentPosition{} within segment \TomatoDivergenceSegment{}.
+Recovering one altered base from the interior of a
+\TomatoDivergentSourceLength{}~bp chromosome exercises the linear and graph
+coordinate reports together, including the position within the segment rather
+than only the segment itself. Against the source set lacking SL5, it reported
+\TomatoMissingIdentifier{} as missing source rather than treating the remaining
+22 identities as complete correspondence.
+
+In the HPRC clipped graph, \HprcClippedIdentical{} traversals were identical.
+The source base ledger partitions \HprcClippedSourceBases{} bases into
+\HprcEmbeddedPercent{}\% matched against an embedded traversal,
+\HprcClippedMissingPathPercent{}\% belonging to the \HprcClippedMissingPath{}
+contigs the graph does not embed at all, and \HprcClippedNotEmbeddedPercent{}\%
+(\HprcNotEmbedded{} bases) falling outside the explicit walk ranges of contigs
+that are embedded. The missing paths are short assembly contigs that
+Minigraph--Cactus does not place; they are reported as absent correspondence
+rather than as sequence loss. The full graph embedded \HprcFullIdentical{}
+traversals identically, reported \HprcFullNotEmbedded{} not-embedded bases as
+expected for untrimmed walks, and left \HprcFullMissingPathPercent{}\% of source
+bases in unplaced contigs. Missing sources numbered \HprcClippedMissingSource{}
+and \HprcFullMissingSource{} for the clipped and full graphs.
+
+Both audits reported the same \HprcClippedDivergent{} divergent traversals, the
+GRCh38 chromosomes, each carrying \HprcClippedSubstituted{} substituted bases in
+total and the same first-divergence source coordinates, even though the two
+graphs were constructed separately and encode GRCh38 as \texttt{P} paths and
+\texttt{W} walks respectively.
+
+\section{Discussion}
+
+These experiments distinguish three properties that are easily conflated:
+internal graph consistency, complete source--traversal correspondence, and exact
+sequence recovery. The tomato controls show why reporting only successfully
+matched paths is insufficient: one changed source or one omitted source must
+make the complete audit fail. The HPRC analysis additionally shows why
+coordinate-aware gaps should not be labelled as sequence substitutions.
+
+The \HprcClippedDivergent{} divergent GRCh38 chromosomes have a single benign
+explanation. GRCh38 carries \HprcClippedSubstituted{} IUPAC ambiguity codes
+outside the \texttt{ACGTN} alphabet, distributed across exactly those
+\HprcClippedDivergent{} chromosomes and no others, and graph construction
+replaced each of them with \texttt{N}. Per-chromosome ambiguity-code and
+substituted-base counts agree exactly in every case, the graph symbol is
+\texttt{N} at every reported position, and in 13 of the
+\HprcClippedDivergent{} chromosomes the replacement occupies a dedicated
+single-base segment. Because the comparison is symbol-exact, \texttt{N} does not
+match \texttt{R}, \texttt{Y}, or \texttt{M}, so the substitution is reported
+instead of silently absorbed. Recovering the same \HprcClippedSubstituted{}
+positions from two independently constructed graphs, through both \texttt{P}
+paths and \texttt{W} walks, indicates a property of the construction pipeline
+rather than of one distributed file. Reporting it is the intended behaviour: the
+audit states what changed and leaves the significance to the reader, which is the
+distinction a topology validator cannot draw.
+
+The tool is deliberately narrower than a general GFA validator. Its guarantee
+applies only after the documented input contract has passed, and it does not
+infer biological homology, validate topology, or support sequence-less segments
+and non-blunt path overlaps. Exact IUPAC equality is appropriate for artifact
+integrity but should not be interpreted as variant calling or assembly-quality
+assessment. Memory telemetry is a tracked admission bound rather than total
+process memory. These limitations are exposed in reports to prevent an identity
+result from being interpreted more broadly than warranted.
+
+The resulting binary outcome, structured diagnostics, and stable exit codes
+make the audit suitable after graph construction or conversion, before data
+release, and as a continuous-integration gate. Topology validation remains a
+complementary step.
+
+\section*{Software and data availability}
+
+Source code, documentation, tests, and installation instructions are available
+at \url{https://github.com/gkanogiannis/panpath-audit}; release 0.1.2 is also
+available from crates.io under the Apache-2.0 license. The repository documents
+the exact public HPRC and tomato acquisition and preparation procedures. Large
+third-party FASTA/GFA inputs are not redistributed. Manuscript scripts, input
+manifests, checksums, raw JSON reports, and generated summaries accompany the
+paper package.
+
+\section*{Author contributions}
+
+Anestis Gkanogiannis: conceptualization, methodology, software, validation,
+formal analysis, investigation, data curation, visualization, writing---original
+draft, and writing---review and editing.
+
+\section*{Funding}
+
+This research received no specific grant from any funding agency in the public,
+commercial, or not-for-profit sectors.
+
+\section*{Competing interests}
+
+The author provides freelance bioinformatics consulting services. No client
+funded, commissioned, or influenced this work.
+
+\section*{Acknowledgements}
+
+The author thanks the Human Pangenome Reference Consortium, the PGGB developers,
+and the original assembly producers for making the evaluated resources publicly
+available.
+
+\printbibliography
+\end{document}

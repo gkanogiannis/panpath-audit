@@ -1,0 +1,16 @@
+key	value
+timestamp_utc	2026-08-22T01:07:18Z
+git_commit	ad06a3a20987c2ef5c6eef84bd19b4a44cf86ce9
+panpath_audit	panpath-audit 0.1.2
+rustc	rustc 1.98.0 (88d9e12ae 2026-08-18)
+cargo	cargo 1.98.0 (797e8a9bc 2026-08-05)
+kernel	Linux 7.0.9-1-default x86_64 GNU/Linux
+kernel_release	7.0.9-1-default
+platform	Linux
+logical_cpus	24
+threads	24
+memory_mib	6144
+host_memory_kib	64674088
+data_fstype	btrfs
+scratch_dir	/var/tmp/panpath-audit-paper-hprc
+scratch_fstype	btrfs

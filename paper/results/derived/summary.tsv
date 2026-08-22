@@ -1,0 +1,6 @@
+case	label	graph	record_types	source_sequences	graph_traversals	source_bases	graph_bases	not_embedded_bases	result	exit_code	elapsed_seconds	max_rss_kib	tracked_peak_bytes
+tomato_baseline	Tomato baseline	PGGB chr. 2	P	23	23	1280460312	1280460312	0	23 identical	0	21.45	1808348	1280460312
+tomato_divergent_mm	Tomato altered MM	PGGB chr. 2	P	23	23	1280460312	1280460312	0	22 identical; 1 divergent	1	21.78	1804428	1280460312
+tomato_missing_sl5	Tomato omitted SL5	PGGB chr. 2	P	22	23	1224650900	1280460312	0	22 identical; 1 missing source	2	22.48	1800844	1224650900
+hprc_clipped	HPRC clipped	Minigraph--Cactus v1.0	P+W	40928	22979	289594475134	254821009311	11671173035	22,923 identical; 14 divergent; 17,991 missing path; 42 missing source	2	2229.49	5141428	3744260982
+hprc_full	HPRC full	Minigraph--Cactus v1.1	W	40928	19855	289594475134	263779764131	0	19,798 identical; 14 divergent; 21,116 missing path; 43 missing source	2	2285.83	5649332	3744260982
