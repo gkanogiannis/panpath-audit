@@ -314,9 +314,15 @@ cargo build --release
 
 ## Citation
 
-If you use panpath-audit in your work, please cite it using
-[`CITATION.cff`](https://github.com/gkanogiannis/panpath-audit/blob/main/CITATION.cff).
-GitHub also exposes this metadata through its “Cite this repository” button.
+If you use panpath-audit in your work, please cite:
+
+> Gkanogiannis, A. (2026). Panpath-Audit: Sequence-Level Verification of
+> Embedded Pangenome Paths Against Source Assemblies. *Preprints*, 202608.1872
+> (Version 1). <https://doi.org/10.20944/preprints202608.1872.v1>
+
+Machine-readable metadata is available in
+[`CITATION.cff`](https://github.com/gkanogiannis/panpath-audit/blob/main/CITATION.cff),
+which GitHub also exposes through its “Cite this repository” button.
 
 ## License
 

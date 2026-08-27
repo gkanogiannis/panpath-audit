@@ -21,3 +21,20 @@ keywords:
   - bioinformatics
   - genomics
   - graph
+preferred-citation:
+  type: article
+  title: >-
+    Panpath-Audit: Sequence-Level Verification of Embedded Pangenome Paths
+    Against Source Assemblies
+  authors:
+    - family-names: Gkanogiannis
+      given-names: Anestis
+      orcid: "https://orcid.org/0000-0002-6441-0688"
+  year: 2026
+  date-published: "2026-08-26"
+  journal: Preprints
+  version: "1"
+  publisher:
+    name: MDPI AG
+  doi: "10.20944/preprints202608.1872.v1"
+  url: "https://doi.org/10.20944/preprints202608.1872.v1"

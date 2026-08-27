@@ -1,8 +1,13 @@
 # panpath-audit manuscript
 
 This directory contains the reproducible manuscript package for the
-panpath-audit bioRxiv preprint. The large FASTA and GFA inputs are not copied
-here; the workflow reads them through the repository-level `data` symlink.
+panpath-audit preprint published by Preprints.org. The large FASTA and GFA inputs
+are not copied here; the workflow reads them through the repository-level
+`data` symlink.
+
+Published version: Gkanogiannis, A. (2026). “Panpath-Audit: Sequence-Level
+Verification of Embedded Pangenome Paths Against Source Assemblies.” *Preprints*
+202608.1872 (Version 1). <https://doi.org/10.20944/preprints202608.1872.v1>
 
 ## Reproduce the analyses
 
