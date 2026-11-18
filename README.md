@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://crates.io/crates/panpath-audit"><img src="https://img.shields.io/crates/v/panpath-audit.svg" alt="crates.io version"></a>
   <a href="https://github.com/gkanogiannis/panpath-audit/actions/workflows/ci.yml"><img src="https://github.com/gkanogiannis/panpath-audit/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/gkanogiannis/panpath-audit/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache-2.0"></a>
+  <a href="#license"><img src="https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg" alt="License: MIT OR Apache-2.0"></a>
   <img src="https://img.shields.io/badge/rust-1.89%2B-orange.svg" alt="Rust 1.89+">
 </p>
 
@@ -326,6 +326,18 @@ which GitHub also exposes through its “Cite this repository” button.
 
 ## License
 
-Apache-2.0. See
-[`LICENSE`](https://github.com/gkanogiannis/panpath-audit/blob/main/LICENSE) and
+Licensed under either of
+
+- Apache License, Version 2.0
+  ([`LICENSE-APACHE`](https://github.com/gkanogiannis/panpath-audit/blob/main/LICENSE-APACHE))
+- MIT license
+  ([`LICENSE-MIT`](https://github.com/gkanogiannis/panpath-audit/blob/main/LICENSE-MIT))
+
+at your option. See also
 [`NOTICE`](https://github.com/gkanogiannis/panpath-audit/blob/main/NOTICE).
+
+Releases up to and including v0.1.2 were published under Apache-2.0 only.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.
